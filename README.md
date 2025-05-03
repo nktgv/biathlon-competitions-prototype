@@ -2,6 +2,33 @@
 The prototype must be able to work with a configuration file and a set of external events of a certain format.
 Solution should contain golang (1.20 or newer) source file/files and unit tests (optional)
 
+## Commands
+1. Clone repo
+2. Download dependencies
+```shell
+ go mod download
+```
+3. Start
+```shell
+task run
+```
+
+## Tests
+1. Run tests
+```shell
+tesk tests
+```
+2. Coverage Report
+```shell
+tesk coverage
+```
+
+## Final report
+The output log ```output.log``` contain the list of all called events occur sequentially in time.
+
+The final report ```result.txt``` contain the list of all registered competitors sorted by ascending time.
+
+
 ## Configuration (json)
 
 - **Laps**        - Amount of laps for main distance
