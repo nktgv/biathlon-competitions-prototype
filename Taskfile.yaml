@@ -11,3 +11,6 @@ tasks:
   tests:
     cmd:
       go test -v ./...
+  lint:
+    cmd:
+      golangci-lint run

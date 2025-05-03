@@ -1,34 +1,42 @@
 package utils
 
 import (
-	"biathlon-competitions-prototype/lib"
 	"sort"
 )
 
 type kv struct {
 	Key   int
-	Value *lib.Result
+	Value *Result
 }
 
-func Sort(m map[int]*lib.Result) map[int]*lib.Result {
+func Sort(m map[int]*Result) []int {
 	var ss []kv
 	for k, v := range m {
 		ss = append(ss, kv{k, v})
 	}
 
 	sort.Slice(ss, func(i, j int) bool {
-		if ss[i].Value.Status == "[NotStarted]" || ss[i].Value.Status == "[NotFinished]" {
-			return false
+		iNotReady := ss[i].Value.Status == "[NotStarted]" || ss[i].Value.Status == "[NotFinished]"
+		jNotReady := ss[j].Value.Status == "[NotStarted]" || ss[j].Value.Status == "[NotFinished]"
+
+		if iNotReady && jNotReady {
+			return ss[i].Value.TotalTime < ss[j].Value.TotalTime
 		}
-		if ss[j].Value.Status == "[NotStarted]" || ss[j].Value.Status == "[NotFinished]" {
+
+		if iNotReady {
 			return true
 		}
-		return ss[i].Value.TotalTime > ss[j].Value.TotalTime
+		if jNotReady {
+			return false
+		}
+
+		return ss[i].Value.TotalTime < ss[j].Value.TotalTime
 	})
 
-	for _, kv := range ss {
-		m[kv.Key] = kv.Value
+	keys := make([]int, len(ss))
+	for i, kv := range ss {
+		keys[i] = kv.Key
 	}
 
-	return m
+	return keys
 }

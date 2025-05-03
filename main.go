@@ -2,7 +2,6 @@ package main
 
 import (
 	"biathlon-competitions-prototype/configs"
-	"biathlon-competitions-prototype/lib"
 	"biathlon-competitions-prototype/lib/logger/sl"
 	"biathlon-competitions-prototype/lib/utils"
 	"fmt"
@@ -37,13 +36,13 @@ func main() {
 		log.Error("cannot read events: ", sl.Err(err))
 	}
 
-	outputEvents, results := lib.ProcessEvents(cfg, events)
+	outputEvents, results, order := utils.ProcessEvents(cfg, events)
 
-	outputLog, err := os.OpenFile("output.log", os.O_APPEND|os.O_WRONLY, os.ModeAppend)
+	outputLog, err := os.OpenFile("output.log", os.O_WRONLY|os.O_CREATE|os.O_APPEND, 0644)
 	if err != nil {
 		log.Error("cannot open output file: ", sl.Err(err))
 	}
-	defer outputLog.Close()
+	defer func() { _ = outputLog.Close() }()
 
 	for _, event := range outputEvents {
 		_, err := fmt.Fprintln(outputLog, event)
@@ -52,14 +51,14 @@ func main() {
 		}
 	}
 
-	resultFile, err := os.OpenFile("result.txt", os.O_APPEND|os.O_WRONLY, os.ModeAppend)
+	resultFile, err := os.OpenFile("result.txt", os.O_WRONLY|os.O_CREATE|os.O_APPEND, 0644)
 	if err != nil {
 		log.Error("cannot open output file: ", sl.Err(err))
 	}
-	defer resultFile.Close()
+	defer func() { _ = resultFile.Close() }()
 
-	for _, result := range results {
-		_, err := fmt.Fprintln(resultFile, lib.FormatResult(result))
+	for _, i := range order {
+		_, err := fmt.Fprintln(resultFile, utils.FormatResult(results[i]))
 		if err != nil {
 			log.Error("cannot write to output file: ", sl.Err(err))
 		}

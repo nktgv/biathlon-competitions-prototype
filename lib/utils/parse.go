@@ -12,7 +12,7 @@ func ParseTime(timeStr string) (time.Time, error) {
 func ParseDuration(timeStr string, layout string) (time.Duration, error) {
 	t, err := time.Parse(layout, timeStr)
 	if err != nil {
-		return 0, fmt.Errorf("invalid time format", err)
+		return 0, fmt.Errorf("invalid time format %e", err)
 	}
 	return time.Duration(t.Hour())*time.Hour +
 		time.Duration(t.Minute())*time.Minute +

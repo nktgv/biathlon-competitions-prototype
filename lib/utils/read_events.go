@@ -14,8 +14,7 @@ type Event struct {
 }
 
 func parseEvents(fileIn *os.File) ([]Event, error) {
-	var in *bufio.Reader
-	in = bufio.NewReader(fileIn)
+	in := bufio.NewReader(fileIn)
 
 	var rawEventTime, extraParams string
 	var competitorID, eventID int
@@ -45,13 +44,13 @@ func parseEvents(fileIn *os.File) ([]Event, error) {
 func ReadEvents(path string) ([]Event, error) {
 	fileIn, err := os.Open(path)
 	if err != nil {
-		return nil, fmt.Errorf("failed to open input file", err)
+		return nil, fmt.Errorf("failed to open input file %e", err)
 	}
-	defer fileIn.Close()
+	defer func() { _ = fileIn.Close() }()
 
 	events, err := parseEvents(fileIn)
 	if err != nil {
-		return nil, fmt.Errorf("error in events parsing", err)
+		return nil, fmt.Errorf("error in events parsing %e", err)
 	}
 
 	return events, nil

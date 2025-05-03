@@ -1,8 +1,7 @@
-package lib
+package utils
 
 import (
 	"biathlon-competitions-prototype/configs"
-	"biathlon-competitions-prototype/lib/utils"
 	"fmt"
 	"strings"
 	"time"
@@ -39,15 +38,15 @@ type Result struct {
 	TotalTime     time.Duration
 }
 
-func ProcessEvents(cfg *configs.Config, events []utils.Event) ([]string, map[int]*Result) {
+func ProcessEvents(cfg *configs.Config, events []Event) ([]string, map[int]*Result, []int) {
 	competitors := make(map[int]*Competitor)
 	results := make(map[int]*Result)
 	var outputEvents []string
 
-	startDelta, _ := utils.ParseDuration(cfg.StartDelta, "15:04:05.000")
+	startDelta, _ := ParseDuration(cfg.StartDelta, "15:04:05.000")
 
 	for _, event := range events {
-		eventTime, _ := utils.ParseTime(event.RawTime[1 : len(event.RawTime)-1])
+		eventTime, _ := ParseTime(event.RawTime[1 : len(event.RawTime)-1])
 		competitor, exists := competitors[event.CompetitorID]
 		if !exists {
 			competitor = &Competitor{
@@ -66,7 +65,7 @@ func ProcessEvents(cfg *configs.Config, events []utils.Event) ([]string, map[int
 			competitor.Registered = true
 			outputEvents = append(outputEvents, fmt.Sprintf("%s The competitor(%d) registered", event.RawTime, event.CompetitorID))
 		case 2:
-			plannedTime, _ := utils.ParseTime(event.ExtraParams)
+			plannedTime, _ := ParseTime(event.ExtraParams)
 			competitor.PlannedStart = plannedTime
 			outputEvents = append(outputEvents, fmt.Sprintf("%s The start time for the competitor(%d) was set by a draw to %s", event.RawTime, event.CompetitorID, event.ExtraParams))
 		case 3:
@@ -99,7 +98,7 @@ func ProcessEvents(cfg *configs.Config, events []utils.Event) ([]string, map[int
 			competitor.OnPenaltyLoop = false
 			penaltyTime := eventTime.Sub(competitor.PenaltyStart)
 			competitor.PenaltyTimes = append(competitor.PenaltyTimes, penaltyTime)
-			results[event.CompetitorID].PenaltyTimes = append(results[event.CompetitorID].PenaltyTimes, utils.FormatDurationToTime(penaltyTime))
+			results[event.CompetitorID].PenaltyTimes = append(results[event.CompetitorID].PenaltyTimes, FormatDurationToTime(penaltyTime))
 			speed := float64(cfg.PenaltyLength) / penaltyTime.Seconds()
 			results[event.CompetitorID].PenaltySpeeds = append(results[event.CompetitorID].PenaltySpeeds, fmt.Sprintf("%.3f", speed))
 			outputEvents = append(outputEvents, fmt.Sprintf("%s The competitor(%d) left the penalty laps", event.RawTime, event.CompetitorID))
@@ -107,7 +106,7 @@ func ProcessEvents(cfg *configs.Config, events []utils.Event) ([]string, map[int
 			lapTime := eventTime.Sub(competitor.ActualStart)
 			competitor.LapTimes = append(competitor.LapTimes, lapTime)
 			results[event.CompetitorID].TotalTime = eventTime.Sub(competitor.ActualStart)
-			results[event.CompetitorID].LapTimes = append(results[event.CompetitorID].LapTimes, utils.FormatDurationToTime(lapTime))
+			results[event.CompetitorID].LapTimes = append(results[event.CompetitorID].LapTimes, FormatDurationToTime(lapTime))
 			speed := float64(cfg.LapLength) / lapTime.Seconds()
 			results[event.CompetitorID].AvgSpeeds = append(results[event.CompetitorID].AvgSpeeds, fmt.Sprintf("%.3f", speed))
 			competitor.CurrentLap++
@@ -120,7 +119,7 @@ func ProcessEvents(cfg *configs.Config, events []utils.Event) ([]string, map[int
 		case 11:
 			competitor.IsNotFinished = true
 			competitor.Comment = event.ExtraParams
-			outputEvents = append(outputEvents, fmt.Sprintf("%s The competitor(%d) can't continue: %s", event.RawTime, event.CompetitorID, event.ExtraParams))
+			outputEvents = append(outputEvents, fmt.Sprintf("%s The competitor(%d) can`t continue: %s", event.RawTime, event.CompetitorID, event.ExtraParams))
 		}
 	}
 
@@ -143,9 +142,9 @@ func ProcessEvents(cfg *configs.Config, events []utils.Event) ([]string, map[int
 		result.ShootingStats = fmt.Sprintf("%d/%d", hits, shots)
 	}
 
-	results = utils.Sort(results)
+	order := Sort(results)
 
-	return outputEvents, results
+	return outputEvents, results, order
 }
 
 func FormatResult(result *Result) string {
@@ -166,8 +165,15 @@ func FormatResult(result *Result) string {
 			builder.WriteString(fmt.Sprintf("{%s, %s}", result.LapTimes[i], result.AvgSpeeds[i]))
 		}
 		for i := 0; i < result.Laps-len(result.LapTimes); i++ {
-			builder.WriteString("{,}")
+			if len(result.LapTimes) == 0 {
+				builder.WriteString("{,}")
+				if i < result.Laps-len(result.LapTimes)-1 {
+					builder.WriteString(", ")
+				}
+				continue
+			}
 			builder.WriteString(", ")
+			builder.WriteString("{,}")
 		}
 	} else {
 		for i := 0; i < result.Laps; i++ {
@@ -190,9 +196,6 @@ func FormatResult(result *Result) string {
 
 	builder.WriteString(" ")
 	builder.WriteString(result.ShootingStats)
-
-	builder.WriteString(" ")
-	builder.WriteString(fmt.Sprintf("%s", result.TotalTime))
 
 	return builder.String()
 }
