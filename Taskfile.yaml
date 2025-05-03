@@ -1,0 +1,13 @@
+version: 3
+
+tasks:
+  coverage:
+    cmds:
+      - go test -coverprofile=coverage.out ./lib/utils/...
+      - go tool cover -html=coverage.out -o coverage.html
+  run:
+    cmd:
+      go run .
+  tests:
+    cmd:
+      go test -v ./...
