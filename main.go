@@ -1,12 +1,13 @@
 package main
 
 import (
-	"biathlon-competitions-prototype/configs"
-	"biathlon-competitions-prototype/lib/logger/sl"
-	"biathlon-competitions-prototype/lib/utils"
 	"fmt"
 	"log/slog"
 	"os"
+
+	"biathlon-competitions-prototype/configs"
+	"biathlon-competitions-prototype/lib/logger/sl"
+	"biathlon-competitions-prototype/lib/utils"
 )
 
 func main() {
@@ -38,7 +39,7 @@ func main() {
 
 	outputEvents, results, order := utils.ProcessEvents(cfg, events)
 
-	outputLog, err := os.OpenFile("output.log", os.O_WRONLY|os.O_CREATE|os.O_APPEND, 0644)
+	outputLog, err := os.OpenFile("output.log", os.O_WRONLY|os.O_CREATE|os.O_APPEND, 0600)
 	if err != nil {
 		log.Error("cannot open output file: ", sl.Err(err))
 	}
@@ -51,7 +52,7 @@ func main() {
 		}
 	}
 
-	resultFile, err := os.OpenFile("result.txt", os.O_WRONLY|os.O_CREATE|os.O_APPEND, 0644)
+	resultFile, err := os.OpenFile("result.txt", os.O_WRONLY|os.O_CREATE|os.O_APPEND, 0600)
 	if err != nil {
 		log.Error("cannot open output file: ", sl.Err(err))
 	}
