@@ -33,6 +33,8 @@ tesk test
 tesk coverage
 ```
 
+Unit-test coverage is ```>95%``` of statements.
+
 ## Final report
 
 The output log ```output.log``` contain the list of all called events occur sequentially in time.
