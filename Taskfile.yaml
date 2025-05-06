@@ -1,16 +1,33 @@
 version: 3
 
 tasks:
+  run:
+    desc: Start project
+    cmd:
+      go run .
+
+  test:
+    desc: Run tests
+    cmd:
+      go test -v ./...
+
   coverage:
+    desc: Run coverage checker
     cmds:
       - go test -coverprofile=coverage.out ./lib/utils/...
       - go tool cover -html=coverage.out -o coverage.html
-  run:
-    cmd:
-      go run .
-  tests:
-    cmd:
-      go test -v ./...
+
   lint:
+    desc: Lint all project
     cmd:
-      golangci-lint run
+      golangci-lint run ./...
+
+  lint:fix:
+    desc: Lint & Fix all project
+    cmd:
+      golangci-lint run --fix
+
+  lint:format:
+    desc: Format with fmt
+    cmd:
+      golangci-lint fmt ./...
