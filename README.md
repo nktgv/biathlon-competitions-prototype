@@ -1,33 +1,43 @@
 # System prototype for biathlon competitions
+
 The prototype must be able to work with a configuration file and a set of external events of a certain format.
 Solution should contain golang (1.20 or newer) source file/files and unit tests (optional)
 
 ## Commands
+
 1. Clone repo
 2. Download dependencies
 ```shell
  go mod download
 ```
+
 3. Start
 ```shell
 task run
 ```
 
+4. Lint
+```shell
+task lint(:fix|format)
+```
+
 ## Tests
+
 1. Run tests
 ```shell
-tesk tests
+tesk test
 ```
+
 2. Coverage Report
 ```shell
 tesk coverage
 ```
 
 ## Final report
+
 The output log ```output.log``` contain the list of all called events occur sequentially in time.
 
 The final report ```result.txt``` contain the list of all registered competitors sorted by ascending time.
-
 
 ## Configuration (json)
 
@@ -39,12 +49,14 @@ The final report ```result.txt``` contain the list of all registered competitors
 - **StartDelta**  - Planned interval between starts
 
 ## Events
+
 All events are characterized by time and event identifier. Outgoing events are events created during program operation. Events related to the "incoming" category cannot be generated and are output in the same form as they were submitted in the input file.
 
 - All events occur sequentially in time. (***Time of event N+1***) >= (***Time of event N***)
 - Time format ***[HH:MM:SS.sss]***. Trailing zeros are required in input and output
 
 #### Common format for events:
+
 [***time***] **eventID** **competitorID** extraParams
 
 ```
@@ -73,6 +85,7 @@ EventID | extraParams | Comments
 ```
 
 ## Final report
+
 The final report should contain the list of all registered competitors
 sorted by ascending time.
 - Total time includes the difference between scheduled and actual start time or **NotStarted**/**NotFinished** marks
