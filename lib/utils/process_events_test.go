@@ -1,12 +1,14 @@
-package utils
+package utils_test
 
 import (
-	"biathlon-competitions-prototype/configs"
 	"testing"
+
+	"biathlon-competitions-prototype/configs"
+	"biathlon-competitions-prototype/lib/utils"
 )
 
 func TestCompetitorInitialization(t *testing.T) {
-	competitor := &Competitor{
+	competitor := &utils.Competitor{
 		ID:              1,
 		ShootingResults: make(map[int][]bool),
 	}
@@ -21,7 +23,7 @@ func TestCompetitorInitialization(t *testing.T) {
 }
 
 func TestResultInitialization(t *testing.T) {
-	result := &Result{
+	result := &utils.Result{
 		CompetitorID: 1,
 		Laps:         3,
 	}
@@ -45,12 +47,12 @@ func TestProcessEvents(t *testing.T) {
 
 	tests := []struct {
 		name     string
-		events   []Event
+		events   []utils.Event
 		expected []string
 	}{
 		{
 			name: "Registration and start",
-			events: []Event{
+			events: []utils.Event{
 				{RawTime: "[10:00:00.000]", CompetitorID: 1, ID: 1},
 				{RawTime: "[10:00:01.000]", CompetitorID: 1, ID: 2, ExtraParams: "10:00:30.000"},
 				{RawTime: "[10:00:29.000]", CompetitorID: 1, ID: 3},
@@ -65,7 +67,7 @@ func TestProcessEvents(t *testing.T) {
 		},
 		{
 			name: "Disqualification for late start",
-			events: []Event{
+			events: []utils.Event{
 				{RawTime: "[10:00:00.000]", CompetitorID: 1, ID: 1},
 				{RawTime: "[10:00:01.000]", CompetitorID: 1, ID: 2, ExtraParams: "10:00:30.000"},
 				{RawTime: "[10:01:01.000]", CompetitorID: 1, ID: 3},
@@ -78,7 +80,7 @@ func TestProcessEvents(t *testing.T) {
 		},
 		{
 			name: "Complete race with two laps",
-			events: []Event{
+			events: []utils.Event{
 				{RawTime: "[10:00:00.000]", CompetitorID: 1, ID: 1},
 				{RawTime: "[10:00:01.000]", CompetitorID: 1, ID: 2, ExtraParams: "10:00:30.000"},
 				{RawTime: "[10:00:29.000]", CompetitorID: 1, ID: 3},
@@ -121,7 +123,7 @@ func TestProcessEvents(t *testing.T) {
 		},
 		{
 			name: "Complete race with shooting",
-			events: []Event{
+			events: []utils.Event{
 				{RawTime: "[10:00:00.000]", CompetitorID: 1, ID: 1},
 				{RawTime: "[10:00:01.000]", CompetitorID: 1, ID: 2, ExtraParams: "10:00:30.000"},
 				{RawTime: "[10:00:29.000]", CompetitorID: 1, ID: 3},
@@ -155,7 +157,7 @@ func TestProcessEvents(t *testing.T) {
 		},
 		{
 			name: "Race with penalty loops",
-			events: []Event{
+			events: []utils.Event{
 				{RawTime: "[10:00:00.000]", CompetitorID: 1, ID: 1},
 				{RawTime: "[10:00:01.000]", CompetitorID: 1, ID: 2, ExtraParams: "10:00:30.000"},
 				{RawTime: "[10:00:29.000]", CompetitorID: 1, ID: 3},
@@ -180,7 +182,7 @@ func TestProcessEvents(t *testing.T) {
 		},
 		{
 			name: "Race not finished",
-			events: []Event{
+			events: []utils.Event{
 				{RawTime: "[10:00:00.000]", CompetitorID: 1, ID: 1},
 				{RawTime: "[10:00:01.000]", CompetitorID: 1, ID: 2, ExtraParams: "10:00:30.000"},
 				{RawTime: "[10:00:29.000]", CompetitorID: 1, ID: 3},
@@ -209,7 +211,7 @@ func TestProcessEvents(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			outputEvents, _, _ := ProcessEvents(cfg, tt.events)
+			outputEvents, _, _ := utils.ProcessEvents(cfg, tt.events)
 
 			if len(outputEvents) != len(tt.expected) {
 				t.Errorf("Expected %d events, got %d", len(tt.expected), len(outputEvents))
@@ -227,12 +229,12 @@ func TestProcessEvents(t *testing.T) {
 func TestFormatResult(t *testing.T) {
 	tests := []struct {
 		name     string
-		result   *Result
+		result   *utils.Result
 		expected string
 	}{
 		{
 			name: "Completed race",
-			result: &Result{
+			result: &utils.Result{
 				CompetitorID:  1,
 				Status:        "10:30:15.500",
 				Laps:          2,
@@ -246,7 +248,7 @@ func TestFormatResult(t *testing.T) {
 		},
 		{
 			name: "Disqualified",
-			result: &Result{
+			result: &utils.Result{
 				CompetitorID:  2,
 				Status:        "NotStarted",
 				Laps:          2,
@@ -258,7 +260,7 @@ func TestFormatResult(t *testing.T) {
 		},
 		{
 			name: "Not finished",
-			result: &Result{
+			result: &utils.Result{
 				CompetitorID:  3,
 				Status:        "NotFinished",
 				Laps:          2,
@@ -272,7 +274,7 @@ func TestFormatResult(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			formatted := FormatResult(tt.result)
+			formatted := utils.FormatResult(tt.result)
 			if formatted != tt.expected {
 				t.Errorf("Format mismatch:\nExpected: %s\nGot:      %s", tt.expected, formatted)
 			}
@@ -288,7 +290,7 @@ func TestShootingStatsCalculation(t *testing.T) {
 		PenaltyLength: 150,
 	}
 
-	events := []Event{
+	events := []utils.Event{
 		{RawTime: "[10:00:00.000]", CompetitorID: 1, ID: 1},
 		{RawTime: "[10:00:01.000]", CompetitorID: 1, ID: 2, ExtraParams: "10:00:30.000"},
 		{RawTime: "[10:00:29.000]", CompetitorID: 1, ID: 3},
@@ -305,7 +307,7 @@ func TestShootingStatsCalculation(t *testing.T) {
 		{RawTime: "[10:06:30.000]", CompetitorID: 1, ID: 10},
 	}
 
-	_, results, _ := ProcessEvents(cfg, events)
+	_, results, _ := utils.ProcessEvents(cfg, events)
 	result := results[1]
 
 	if result.ShootingStats != "4/10" {

@@ -2,7 +2,9 @@ package utils
 
 import (
 	"bufio"
+	"errors"
 	"fmt"
+	"io"
 	"os"
 )
 
@@ -22,12 +24,21 @@ func parseEvents(fileIn *os.File) ([]Event, error) {
 
 	for {
 		if _, err := fmt.Fscan(in, &rawEventTime, &eventID, &competitorID); err != nil {
-			break
+			if errors.Is(err, io.EOF) {
+				break
+			}
+			return nil, fmt.Errorf("error while scanning: %w", err)
 		}
 		if eventID == 2 || eventID == 5 || eventID == 6 || eventID == 11 {
 			_, err := fmt.Fscan(in, &extraParams)
 			if err != nil {
-				break
+				if errors.Is(err, io.EOF) {
+					break
+				}
+				if extraParams != "" {
+					return nil, fmt.Errorf("extra params missing: %w", err)
+				}
+				return nil, fmt.Errorf("error while scanning extra params: %w", err)
 			}
 		}
 		events = append(events, Event{
@@ -44,14 +55,13 @@ func parseEvents(fileIn *os.File) ([]Event, error) {
 func ReadEvents(path string) ([]Event, error) {
 	fileIn, err := os.Open(path)
 	if err != nil {
-		return nil, fmt.Errorf("failed to open input file %e", err)
+		return nil, fmt.Errorf("failed to open input file: %w", err)
 	}
 	defer func() { _ = fileIn.Close() }()
 
 	events, err := parseEvents(fileIn)
 	if err != nil {
-		return nil, fmt.Errorf("error in events parsing %e", err)
+		return nil, fmt.Errorf("cannot parse events: %w", err)
 	}
-
 	return events, nil
 }

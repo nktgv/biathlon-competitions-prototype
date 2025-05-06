@@ -1,32 +1,34 @@
-package utils
+package utils_test
 
 import (
 	"slices"
 	"testing"
 	"time"
+
+	"biathlon-competitions-prototype/lib/utils"
 )
 
 func TestSort(t *testing.T) {
 	tests := []struct {
 		name     string
-		input    map[int]*Result
+		input    map[int]*utils.Result
 		expected []int
 	}{
 		{
 			name:     "empty map",
-			input:    map[int]*Result{},
+			input:    map[int]*utils.Result{},
 			expected: []int{},
 		},
 		{
 			name: "single element",
-			input: map[int]*Result{
+			input: map[int]*utils.Result{
 				1: {Status: "[Finished]", TotalTime: 10 * time.Second},
 			},
 			expected: []int{1},
 		},
 		{
 			name: "sorted by time descending",
-			input: map[int]*Result{
+			input: map[int]*utils.Result{
 				1: {Status: "[Finished]", TotalTime: 30 * time.Second},
 				2: {Status: "[Finished]", TotalTime: 20 * time.Second},
 				3: {Status: "[Finished]", TotalTime: 10 * time.Second},
@@ -35,7 +37,7 @@ func TestSort(t *testing.T) {
 		},
 		{
 			name: "NotStarted and NotFinished come last",
-			input: map[int]*Result{
+			input: map[int]*utils.Result{
 				1: {Status: "[NotStarted]", TotalTime: 10 * time.Second},
 				2: {Status: "[Finished]", TotalTime: 20 * time.Second},
 				3: {Status: "[NotFinished]", TotalTime: 30 * time.Second},
@@ -45,7 +47,7 @@ func TestSort(t *testing.T) {
 		},
 		{
 			name: "mixed statuses",
-			input: map[int]*Result{
+			input: map[int]*utils.Result{
 				1: {Status: "[Finished]", TotalTime: 10 * time.Second},
 				2: {Status: "[NotStarted]", TotalTime: 20 * time.Second},
 				3: {Status: "[Finished]", TotalTime: 30 * time.Second},
@@ -56,7 +58,7 @@ func TestSort(t *testing.T) {
 		},
 		{
 			name: "equal times, different statuses",
-			input: map[int]*Result{
+			input: map[int]*utils.Result{
 				1: {Status: "[Finished]", TotalTime: 10 * time.Second},
 				2: {Status: "[NotStarted]", TotalTime: 10 * time.Second},
 				3: {Status: "[Finished]", TotalTime: 10 * time.Second},
@@ -67,7 +69,7 @@ func TestSort(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			order := Sort(tt.input)
+			order := utils.Sort(tt.input)
 
 			var keys []int
 			for k := range order {

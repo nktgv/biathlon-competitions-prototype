@@ -1,10 +1,12 @@
-package utils
+package utils_test
 
 import (
 	"testing"
 	"time"
 
+	"biathlon-competitions-prototype/lib/utils"
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 func TestParseTime(t *testing.T) {
@@ -46,12 +48,12 @@ func TestParseTime(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			got, err := ParseTime(tt.input)
+			got, err := utils.ParseTime(tt.input)
 			if tt.wantErr {
 				assert.Error(t, err)
 				return
 			}
-			assert.NoError(t, err)
+			require.NoError(t, err)
 			assert.Equal(t, tt.expected, got)
 		})
 	}
@@ -102,12 +104,12 @@ func TestParseDuration(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			got, err := ParseDuration(tt.input, tt.layout)
+			got, err := utils.ParseDuration(tt.input, tt.layout)
 			if tt.wantErr {
 				assert.Error(t, err)
 				return
 			}
-			assert.NoError(t, err)
+			require.NoError(t, err)
 			assert.Equal(t, tt.expected, got)
 		})
 	}
@@ -158,7 +160,7 @@ func TestFormatDurationToTime(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			got := FormatDurationToTime(tt.input)
+			got := utils.FormatDurationToTime(tt.input)
 			assert.Equal(t, tt.expected, got)
 		})
 	}
